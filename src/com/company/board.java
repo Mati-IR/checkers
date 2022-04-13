@@ -16,7 +16,7 @@ public class board {
     private static final Color myBrown = new Color(143, 90, 10);
     private static final Color myLtBrown = new Color(245, 200, 144);
     int size = 8;//x and y dimension of board
-    int fields[][] = new int[size][size];//2D array of size x size
+    JButton fields[][] = new JButton[size][size];//2D array of size x size
 
     void draw() {
 
@@ -32,21 +32,21 @@ public class board {
 
         for (int i = 0; i < size; i++) { //     adding fields of checkers board
             for (int j = 0; j < size; j++) {
-                JButton button = new JButton();
+                fields[i][j] = new JButton();
                 if (i%2 == 0) {
                     if (j%2 == 0) {
-                        button.setBackground(myLtBrown);
+                        fields[i][j].setBackground(myLtBrown);
                     }else {
-                        button.setBackground(myBrown);
+                        fields[i][j].setBackground(myBrown);
                     }
                 }else {
                     if (j%2 == 0) {
-                        button.setBackground(myBrown);
+                        fields[i][j].setBackground(myBrown);
                     }else {
-                        button.setBackground(myLtBrown);
+                        fields[i][j].setBackground(myLtBrown);
                     }
                 }
-                panel.add(button);
+                panel.add(fields[i][j]);
             }
         }
 
@@ -59,5 +59,5 @@ public class board {
 
     void initialize(){
         draw();
-         }
+    }
 }
