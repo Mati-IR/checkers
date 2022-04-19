@@ -42,7 +42,7 @@ public class board {
         return xAxis%2 != yAxis%2 ? 1 : 3;//bottom fields, light pawns on start
     }
 
-    void draw() {
+    void drawBoard() {
 
         JFrame frame = new JFrame("Checkers");//        setting up game window
         frame.setSize(620, 600);
@@ -77,7 +77,7 @@ public class board {
                     }
                     case 3:{//dark field with light pawn
                         icon = new ImageIcon(getClass().getResource("icons/dark_lightpawn.png"));
-                        futureColor = myLtBrown;
+                        futureColor = myBrown;
                         break;
                     }
                     default:{//default case that SHOULD NOT occur
@@ -102,6 +102,6 @@ public class board {
 
 
     void initialize(){
-        draw();         //open window with board GUI
+        drawBoard();         //open window with board GUI
     }
 }
