@@ -16,7 +16,12 @@ public class board {
     private static final Color myBrown = new Color(143, 90, 10);
     private static final Color myLtBrown = new Color(245, 200, 144);
     int size = 8;//x and y dimension of board
-    JButton fields[][] = new JButton[size][size];//2D array of size x size
+    JButton fieldsVisual[][] = new JButton[size][size];//2D array for GUI
+
+    int fieldsValues[][] = new int[size][size];//2D array for backend depiction of field
+    int empty = 0;
+    int darkPawn = 1;
+    int lightPawn = 2;
 
     int initialFieldValue(int xAxis, int yAxis) {
         //0 dark_empty.png
@@ -37,7 +42,7 @@ public class board {
         return xAxis%2 != yAxis%2 ? 1 : 3;//bottom fields, light pawns on start
     }
 
-    void draw() {
+    void drawBoard() {
 
         JFrame frame = new JFrame("Checkers");//        setting up game window
         frame.setSize(620, 600);
@@ -55,35 +60,35 @@ public class board {
                 Color futureColor = new Color(0, 0, 0);
 
                 switch (initialFieldValue(xAxis, yAxis)) {
-                    case 0: {
+                    case 0: {//empty dark field
                         icon = new ImageIcon(getClass().getResource("icons/dark_empty.png"));
                         futureColor = myBrown;
                         break;
                     }
-                    case 1:{
+                    case 1:{//empty light field
                         icon = new ImageIcon(getClass().getResource("icons/light_empty.png"));
                         futureColor = myLtBrown;
                         break;
                     }
-                    case 2:{
+                    case 2:{//dark field with dark pawn
                         icon = new ImageIcon(getClass().getResource("icons/dark_darkpawn.png"));
                         futureColor = myBrown;
                         break;
                     }
-                    case 3:{
+                    case 3:{//dark field with light pawn
                         icon = new ImageIcon(getClass().getResource("icons/dark_lightpawn.png"));
-                        futureColor = myLtBrown;
+                        futureColor = myBrown;
                         break;
                     }
-                    default:{
+                    default:{//default case that SHOULD NOT occur
                         icon = new ImageIcon(getClass().getResource("icons/test.png"));
                     }
 
                 }
-                fields[yAxis][xAxis] = new JButton(icon);   //create button with icon image on it
-                fields[yAxis][xAxis].setSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
-                fields[yAxis][xAxis].setBackground(futureColor);
-                panel.add(fields[yAxis][xAxis]);//adding fields of checkers board
+                fieldsVisual[yAxis][xAxis] = new JButton(icon);   //create button with icon image on it
+                fieldsVisual[yAxis][xAxis].setSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
+                fieldsVisual[yAxis][xAxis].setBackground(futureColor);
+                panel.add(fieldsVisual[yAxis][xAxis]);//adding fields of checkers board
             }
         }
 
@@ -97,6 +102,6 @@ public class board {
 
 
     void initialize(){
-        draw();         //open window with board GUI
+        drawBoard();         //open window with board GUI
     }
 }
