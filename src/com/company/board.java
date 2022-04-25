@@ -201,6 +201,7 @@ public class board {
             System.out.println("Pressed buttons are: " + pressedButtons[0].getX() + " " + pressedButtons[0].getY() + " " + pressedButtons[1].getX() + " " + pressedButtons[1].getY());
             fieldsVisual[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
             fieldsVisual[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
+            //TODO: make pawn move in this if statement
 
         }
 
