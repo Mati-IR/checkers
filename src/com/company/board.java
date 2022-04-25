@@ -4,29 +4,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 import static java.lang.Thread.sleep;
 
 public class board {
-    int gameType = -1;//incorrect value for used in do while loop in choosegameType()
-    private final int A = 1;
-    private final int B = 2;
-    private final int C = 3;
-    private final int D = 4;
-    private final int E = 5;
-    private final int F = 6;
-    private final int G = 7;
-    private final int H = 8;
+    private int gameType = -1;//incorrect value for used in do while loop in choosegameType()
 
-    private static final Color myBrown = new Color(143, 90, 10);
-    private static final Color myLtBrown = new Color(245, 200, 144);
+
+    private static final Color myBlack = new Color(143, 90, 10);
+    private static final Color myWhite = new Color(245, 200, 144);
     private int size = 8;//x and y dimension of board
-    JButton fieldsVisual[][] = new JButton[size][size];//2D array for GUI
+    //JButton fieldsVisual[][] = new JButton[size][size];//2D array for GUI
+    field fieldsVisual[][] = new field[size][size];
 
-    private int fieldsValues[][] = new int[size][size];//2D array for backend depiction of field. It portrays placement of pawns on the board
+    //private int fieldsValues[][] = new int[size][size];//2D array for backend depiction of field. It portrays placement of pawns on the board
     private final int empty = 0;
-    private final int darkPawn = 1;
-    private final int lightPawn = 2;
+    private final int blackPawn = 1;
+    private final int whitePawn = 2;
 
     private int initialFieldValue(int xAxis, int yAxis) {
         //0 dark_empty.png
@@ -63,26 +58,35 @@ public class board {
             for (int xAxis = 0; xAxis < size; xAxis++) {
                 Icon icon;
                 Color futureColor = new Color(0, 0, 0);
+                int fieldValue = -1;
 
                 switch (initialFieldValue(xAxis, yAxis)) {
                     case 0: {//empty dark field
-                        icon = new ImageIcon(getClass().getResource("icons/dark_empty.png"));
-                        futureColor = myBrown;
+                        //icon = new ImageIcon(getClass().getResource("icons/dark_empty.png"));
+                        icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
+                        futureColor = myBlack;
+                        fieldValue = empty;
                         break;
                     }
                     case 1:{//empty light field
-                        icon = new ImageIcon(getClass().getResource("icons/light_empty.png"));
-                        futureColor = myLtBrown;
+                        //icon = new ImageIcon(getClass().getResource("icons/light_empty.png"));
+                        //create transparent icon
+                        icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)); // transparent icon
+                        futureColor = myWhite;
+                        fieldValue = empty;
                         break;
                     }
                     case 2:{//dark field with dark pawn
-                        icon = new ImageIcon(getClass().getResource("icons/dark_darkpawn.png"));
-                        futureColor = myBrown;
+                        icon = new ImageIcon(getClass().getResource("icons/blackPawn.png"));
+                        futureColor = myBlack;
+                        fieldValue = blackPawn;
                         break;
                     }
                     case 3:{//dark field with light pawn
-                        icon = new ImageIcon(getClass().getResource("icons/dark_lightpawn.png"));
-                        futureColor = myBrown;
+                        //icon = new ImageIcon(getClass().getResource("icons/dark_lightpawn.png"));
+                        icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
+                        futureColor = myBlack;
+                        fieldValue = whitePawn;
                         break;
                     }
                     default:{//default case that SHOULD NOT occur
@@ -90,10 +94,9 @@ public class board {
                     }
 
                 }
-                fieldsVisual[yAxis][xAxis] = new JButton(icon);   //create button with icon image on it
-                fieldsVisual[yAxis][xAxis].setSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
-                fieldsVisual[yAxis][xAxis].setBackground(futureColor);
-                panel.add(fieldsVisual[yAxis][xAxis]);//adding fields of checkers board
+                fieldsVisual[yAxis][xAxis] = new field(icon, new Dimension(icon.getIconWidth(), icon.getIconHeight()), futureColor, xAxis, yAxis);
+                fieldsVisual[yAxis][xAxis].setCurrentPawn(fieldValue);
+                panel.add(fieldsVisual[yAxis][xAxis].button);//adding fields of checkers board
             }
         }
 
@@ -111,7 +114,7 @@ public class board {
         return gameType;
     }
 
-    private void choosegameType(){
+    private void chooseGameType(){
         //set up choice window
         JFrame frame = new JFrame("Choose game type");
         frame.setSize(400, 100);
@@ -161,21 +164,76 @@ public class board {
         return;
     }
 
-    private void hotseatGame(){
 
+
+    int move(field currentPos, field destination){
+
+        return 0;//everything ok
+    }
+    
+    boolean bothPlayersHavePawns(){
+        int whites = 0, blacks = 0;
+        for (field i[]: fieldsVisual) {//iterate over each field and count pawns
+            for (field j: i) {
+                if(j.getCurrentPawn() == whitePawn)
+                    whites++;
+                if (j.getCurrentPawn() == blackPawn)
+                    blacks++;
+            }
+        }
+        //System.out.println("whites = " + whites + "\nblacks = " + blacks);
+        return (blacks != 0 && whites != 0);
+    }
+
+    void findMoveAttempt(){
+        int pressedButtonsCounter = 0;
+        //array with 2 coordinates
+        coordinates pressedButtons[] = new coordinates[2];
+        for (field i[]: fieldsVisual) {//iterate over each field and count pawns
+            for (field j: i) {
+                if(j.getIsPressed()){
+                    pressedButtonsCounter++;
+                    pressedButtons[pressedButtonsCounter-1] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
+                }
+            }
+        }
+        if(pressedButtonsCounter == 2){//show pressed buttons;
+            System.out.println("Pressed buttons are: " + pressedButtons[0].getX() + " " + pressedButtons[0].getY() + " " + pressedButtons[1].getX() + " " + pressedButtons[1].getY());
+            fieldsVisual[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
+            fieldsVisual[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
+
+        }
+
+
+
+    }
+
+    private void hotseatGame(){
+        System.out.println("Hotseat game");
+        while (bothPlayersHavePawns()) {
+            findMoveAttempt();
+        }
     }
 
     public void initialize(){
         drawBoard();         //open window with board GUI
+        for (int yAxis = 0; yAxis < size; yAxis++) {
+            for (int xAxis = 0; xAxis < size; xAxis++) {
+                System.out.print(fieldsVisual[yAxis][xAxis].getCurrentPawn());
+            }
+            System.out.println();
+
+        }
     }
     public void play(){
-        choosegameType();
+        System.out.println(bothPlayersHavePawns());
+        chooseGameType();
         System.out.println("gameType = " + getGameType());
         /*
         0 - hotseat
         1 - LAN
         2 - PvE
-         */
+        */
         switch (getGameType()){
             case 0:{
                 hotseatGame();
