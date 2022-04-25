@@ -12,26 +12,38 @@ public class field {
     public final int empty = 0;
     public final int blackPawn = 1;
     public final int whitePawn = 2;
+    private Color fieldColor;
     private int currentPawn;
     private boolean isPressed;
     public JButton button;
 
 
     field(Icon icon, Dimension dimension, Color color, int x, int y){//initializer
+        initializeButton(icon, dimension, color);
+        setX(x);//set point coordinates
+        setY(y);
+        isPressed = false;
+        fieldColor = color;
+    }
+
+    void initializeButton(Icon icon, Dimension dimension, Color color){
         button = new JButton(icon);
         button.setPreferredSize(dimension);
         button.setBackground(color);
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Button "+ getX() + " " + getY() + " clicked");
                 JButton button = (JButton) e.getSource();//returns the button that was clicked
+                if (getIsPressed()){//if button already pressed
+                    setIsPressed(false);//disable the button
+                    button.setBackground(fieldColor);//restore original field color
+                    System.out.println("Button "+ getX() + " " + getY() + " UN-PRESSED");
+                    return;
+                }
+                System.out.println("Button "+ getX() + " " + getY() + " pressed");
                 button.setBackground(Color.BLUE);
                 setIsPressed(true);
             }
         });
-        setX(x);//set point coordinates
-        setY(y);
-        isPressed = false;
     }
     void setIcon(Icon icon){
         button.setIcon(icon);
@@ -67,5 +79,13 @@ public class field {
 
     public void setIsPressed(boolean pressed) {
         isPressed = pressed;
+    }
+
+    public Color getFieldColor() {
+        return fieldColor;
+    }
+
+    public void setFieldColor(Color fieldColor) {
+        this.fieldColor = fieldColor;
     }
 }

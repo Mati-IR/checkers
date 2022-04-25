@@ -23,6 +23,32 @@ public class board {
     private final int blackPawn = 1;
     private final int whitePawn = 2;
 
+    public void initialize(){
+        drawBoard();         //open window with board GUI
+        for (int yAxis = 0; yAxis < size; yAxis++) {
+            for (int xAxis = 0; xAxis < size; xAxis++) {
+                System.out.print(fieldsVisual[yAxis][xAxis].getCurrentPawn());
+            }
+            System.out.println();
+
+        }
+    }
+    public void play(){
+        System.out.println(bothPlayersHavePawns());
+        chooseGameType();
+        System.out.println("gameType = " + getGameType());
+        /*
+        0 - hotseat
+        1 - LAN
+        2 - PvE
+        */
+        switch (getGameType()){
+            case 0:{
+                hotseatGame();
+            }
+        }
+    }
+
     private int initialFieldValue(int xAxis, int yAxis) {
         //0 dark_empty.png
         //1 light_empty.png
@@ -113,7 +139,99 @@ public class board {
     int getGameType(){
         return gameType;
     }
+    
+    boolean bothPlayersHavePawns(){
+        int whites = 0, blacks = 0;
+        for (field i[]: fieldsVisual) {//iterate over each field and count pawns
+            for (field j: i) {
+                if(j.getCurrentPawn() == whitePawn)
+                    whites++;
+                if (j.getCurrentPawn() == blackPawn)
+                    blacks++;
+            }
+        }
+        //System.out.println("whites = " + whites + "\nblacks = " + blacks);
+        return (blacks != 0 && whites != 0);
+    }
 
+    void findMoveAttempt(){
+        int pressedButtonsCounter = 0;
+        //array with 2 coordinates
+        coordinates pressedButtons[] = new coordinates[2];
+        for (field i[]: fieldsVisual) {//iterate over each field and count pawns
+            for (field j: i) {
+                if(j.getIsPressed()){
+                    pressedButtonsCounter++;
+                    pressedButtons[pressedButtonsCounter-1] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
+                }
+            }
+        }
+        if(pressedButtonsCounter == 2){//show pressed buttons;
+            System.out.println("Pressed buttons are: " + pressedButtons[0].getX() + " " + pressedButtons[0].getY() + " " + pressedButtons[1].getX() + " " + pressedButtons[1].getY());
+            fieldsVisual[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
+            fieldsVisual[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
+            //TODO: make pawn move in this if statement
+            move(pressedButtons);
+            refreshIcons();
+        }
+    }
+    int move(coordinates pressedButtons[]){
+        //TODO: create if that validates move
+        if (swapFieldValues(pressedButtons) != 0){
+            System.out.println("Move unsuccessful");
+            return 1;
+        }
+        return 0;//everything ok
+    }
+    int swapFieldValues(coordinates fieldCoordinates[]){//2 values to swap
+        if (fieldCoordinates.length != 2){
+            System.out.println("Wrong number of arguments in swapFieldValues");
+            return 1;
+        }
+        System.out.println("Current values are: " + fieldsVisual[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() + " " + fieldsVisual[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
+        int tempFieldValue = fieldsVisual[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn();
+        fieldsVisual[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].setCurrentPawn(fieldsVisual[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
+        fieldsVisual[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].setCurrentPawn(tempFieldValue);
+        System.out.println("swapped" + fieldCoordinates[0].getX() + " " + fieldCoordinates[0].getY() + " " + fieldCoordinates[1].getX() + " " + fieldCoordinates[1].getY());
+        System.out.println("Values now are: " + fieldsVisual[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() + " " + fieldsVisual[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
+        return 0;
+    }
+    private void refreshIcons() {
+        System.out.println("Refreshing icons...");
+        for (field i[] : fieldsVisual) {//iterate over each field and count pawns
+            for (field j : i) {
+                Icon icon;
+                int fieldValue = -1;
+
+                switch (j.getCurrentPawn()) {
+                    case empty: {//empty dark field
+                        //icon = new ImageIcon(getClass().getResource("icons/dark_empty.png"));
+                        icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
+                        fieldValue = empty;
+                        break;
+                    }
+                    case blackPawn: {//empty light field
+                        //icon = new ImageIcon(getClass().getResource("icons/light_empty.png"));
+                        //create transparent icon
+                        icon = new ImageIcon(getClass().getResource("icons/blackPawn.png"));
+                        fieldValue = blackPawn;
+                        break;
+                    }
+                    case whitePawn: {//dark field with dark pawn
+                        icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
+                        fieldValue = blackPawn;
+                        break;
+                    }
+                    default: {//default case that SHOULD NOT occur
+                        icon = new ImageIcon(getClass().getResource("icons/test.png"));
+                        break;
+                    }
+                }
+                j.setIcon(icon);
+                j.button.setBackground(j.getFieldColor()); //remove highlight by re-painting the field
+            }
+        }
+    }
     private void chooseGameType(){
         //set up choice window
         JFrame frame = new JFrame("Choose game type");
@@ -165,50 +283,6 @@ public class board {
     }
 
 
-
-    int move(field currentPos, field destination){
-
-        return 0;//everything ok
-    }
-    
-    boolean bothPlayersHavePawns(){
-        int whites = 0, blacks = 0;
-        for (field i[]: fieldsVisual) {//iterate over each field and count pawns
-            for (field j: i) {
-                if(j.getCurrentPawn() == whitePawn)
-                    whites++;
-                if (j.getCurrentPawn() == blackPawn)
-                    blacks++;
-            }
-        }
-        //System.out.println("whites = " + whites + "\nblacks = " + blacks);
-        return (blacks != 0 && whites != 0);
-    }
-
-    void findMoveAttempt(){
-        int pressedButtonsCounter = 0;
-        //array with 2 coordinates
-        coordinates pressedButtons[] = new coordinates[2];
-        for (field i[]: fieldsVisual) {//iterate over each field and count pawns
-            for (field j: i) {
-                if(j.getIsPressed()){
-                    pressedButtonsCounter++;
-                    pressedButtons[pressedButtonsCounter-1] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
-                }
-            }
-        }
-        if(pressedButtonsCounter == 2){//show pressed buttons;
-            System.out.println("Pressed buttons are: " + pressedButtons[0].getX() + " " + pressedButtons[0].getY() + " " + pressedButtons[1].getX() + " " + pressedButtons[1].getY());
-            fieldsVisual[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
-            fieldsVisual[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
-            //TODO: make pawn move in this if statement
-
-        }
-
-
-
-    }
-
     private void hotseatGame(){
         System.out.println("Hotseat game");
         while (bothPlayersHavePawns()) {
@@ -216,30 +290,6 @@ public class board {
         }
     }
 
-    public void initialize(){
-        drawBoard();         //open window with board GUI
-        for (int yAxis = 0; yAxis < size; yAxis++) {
-            for (int xAxis = 0; xAxis < size; xAxis++) {
-                System.out.print(fieldsVisual[yAxis][xAxis].getCurrentPawn());
-            }
-            System.out.println();
 
-        }
-    }
-    public void play(){
-        System.out.println(bothPlayersHavePawns());
-        chooseGameType();
-        System.out.println("gameType = " + getGameType());
-        /*
-        0 - hotseat
-        1 - LAN
-        2 - PvE
-        */
-        switch (getGameType()){
-            case 0:{
-                hotseatGame();
-            }
-        }
-    }
 
 }
