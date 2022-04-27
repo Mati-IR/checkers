@@ -10,6 +10,10 @@ public class coordinates {
         this.x = x;
         this.y = y;
     }
+    void printCoordinates(){
+        System.out.println("(" + x + "," + y + ")");
+        return;
+    }
 
     public int getX() {
         return x;

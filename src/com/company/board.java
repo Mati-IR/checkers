@@ -16,7 +16,7 @@ public class board {
     private static final Color myWhite = new Color(245, 200, 144);
     private int size = 8;//x and y dimension of board
     //JButton fieldsVisual[][] = new JButton[size][size];//2D array for GUI
-    field fieldsVisual[][] = new field[size][size];
+    field fields[][] = new field[size][size];
 
     //private int fieldsValues[][] = new int[size][size];//2D array for backend depiction of field. It portrays placement of pawns on the board
     private final int empty = 0;
@@ -27,7 +27,7 @@ public class board {
         drawBoard();         //open window with board GUI
         for (int yAxis = 0; yAxis < size; yAxis++) {
             for (int xAxis = 0; xAxis < size; xAxis++) {
-                System.out.print(fieldsVisual[yAxis][xAxis].getCurrentPawn());
+                System.out.print(fields[yAxis][xAxis].getCurrentPawn());
             }
             System.out.println();
 
@@ -88,15 +88,12 @@ public class board {
 
                 switch (initialFieldValue(xAxis, yAxis)) {
                     case 0: {//empty dark field
-                        //icon = new ImageIcon(getClass().getResource("icons/dark_empty.png"));
                         icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
                         futureColor = myBlack;
                         fieldValue = empty;
                         break;
                     }
                     case 1:{//empty light field
-                        //icon = new ImageIcon(getClass().getResource("icons/light_empty.png"));
-                        //create transparent icon
                         icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)); // transparent icon
                         futureColor = myWhite;
                         fieldValue = empty;
@@ -109,7 +106,6 @@ public class board {
                         break;
                     }
                     case 3:{//dark field with light pawn
-                        //icon = new ImageIcon(getClass().getResource("icons/dark_lightpawn.png"));
                         icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
                         futureColor = myBlack;
                         fieldValue = whitePawn;
@@ -120,17 +116,15 @@ public class board {
                     }
 
                 }
-                fieldsVisual[yAxis][xAxis] = new field(icon, new Dimension(icon.getIconWidth(), icon.getIconHeight()), futureColor, xAxis, yAxis);
-                fieldsVisual[yAxis][xAxis].setCurrentPawn(fieldValue);
-                panel.add(fieldsVisual[yAxis][xAxis].button);//adding fields of checkers board
+                fields[yAxis][xAxis] = new field(icon, new Dimension(icon.getIconWidth(), icon.getIconHeight()), futureColor, xAxis, yAxis);
+                fields[yAxis][xAxis].setCurrentPawn(fieldValue);
+                panel.add(fields[yAxis][xAxis].button);//adding fields of checkers board
             }
         }
 
         frame.setVisible(true);
         frame.add(panel);       //include checkers board in game window
         panel.setVisible(true);
-
-
     }
 
     int getSize(){
@@ -142,7 +136,7 @@ public class board {
     
     boolean bothPlayersHavePawns(){
         int whites = 0, blacks = 0;
-        for (field i[]: fieldsVisual) {//iterate over each field and count pawns
+        for (field i[]: fields) {//iterate over each field and count pawns
             for (field j: i) {
                 if(j.getCurrentPawn() == whitePawn)
                     whites++;
@@ -154,25 +148,34 @@ public class board {
         return (blacks != 0 && whites != 0);
     }
 
-    void findMoveAttempt(){
+    void findMoveAttempt() {
         int pressedButtonsCounter = 0;
-        //array with 2 coordinates
-        coordinates pressedButtons[] = new coordinates[2];
-        for (field i[]: fieldsVisual) {//iterate over each field and count pawns
-            for (field j: i) {
-                if(j.getIsPressed()){
+        coordinates[] pressedButtons = new coordinates[2];        //array with 2 coordinates
+
+        for (field i[] : fields) {//iterate over each field and count pawns
+            for (field j : i) {
+                if (j.getIsPressed() /*&& (j.getX() != pressedButtons[0].getX() && j.getY() != pressedButtons[0].getY())*/) {//if found presesd button different than the one first pressed
+                    pressedButtons[pressedButtonsCounter] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
+                    System.out.println("Detected pressed button: " + pressedButtons[pressedButtonsCounter].getX() + " " + pressedButtons[pressedButtonsCounter].getY());
                     pressedButtonsCounter++;
-                    pressedButtons[pressedButtonsCounter-1] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
                 }
+                if (pressedButtonsCounter == 2)
+                    break;
             }
-        }
-        if(pressedButtonsCounter == 2){//show pressed buttons;
-            System.out.println("Pressed buttons are: " + pressedButtons[0].getX() + " " + pressedButtons[0].getY() + " " + pressedButtons[1].getX() + " " + pressedButtons[1].getY());
-            fieldsVisual[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
-            fieldsVisual[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
-            //TODO: make pawn move in this if statement
-            move(pressedButtons);
-            refreshIcons();
+            if (pressedButtonsCounter == 1 && !(fields[pressedButtons[0].getY()][pressedButtons[0].getX()].getIsPressed())) {//check if first clicked button is still clicked
+                System.out.println("First button is not pressed anymore");
+            }
+            if (pressedButtonsCounter == 2) {//show pressed buttons;
+                System.out.println("\nPressed buttons are: " + pressedButtons[0].getX() + " " + pressedButtons[0].getY() + " " + pressedButtons[1].getX() + " " + pressedButtons[1].getY());
+                fields[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
+                fields[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
+                //TODO: make pawn move in this if statement
+                if (move(pressedButtons) != 0) {
+                    System.out.println("Invalid move attempt");
+                }
+                refreshIcons();
+                //pressedButtonsCounter = 0;
+            }
         }
     }
     int move(coordinates pressedButtons[]){
@@ -183,43 +186,72 @@ public class board {
         }
         return 0;//everything ok
     }
+    void printBackend(){
+        for (field i[]: fields) {//iterate over each field and count pawns
+            for (field j: i) {
+                System.out.print(j.getCurrentPawn());
+            }
+            System.out.println();
+        }
+    }
     int swapFieldValues(coordinates fieldCoordinates[]){//2 values to swap
-        if (fieldCoordinates.length != 2){
+        System.out.println("*********** NEW SWAP ***********");
+        fieldCoordinates[0].printCoordinates();
+        fieldCoordinates[1].printCoordinates();
+        System.out.println("Backend before swap:\n");
+        printBackend();
+        if (fieldCoordinates.length != 2){//bad parameter passed
             System.out.println("Wrong number of arguments in swapFieldValues");
+            System.out.println("Backend after fail\n");
+            printBackend();
             return 1;
         }
-        System.out.println("Current values are: " + fieldsVisual[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() + " " + fieldsVisual[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
-        int tempFieldValue = fieldsVisual[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn();
-        fieldsVisual[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].setCurrentPawn(fieldsVisual[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
-        fieldsVisual[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].setCurrentPawn(tempFieldValue);
-        System.out.println("swapped" + fieldCoordinates[0].getX() + " " + fieldCoordinates[0].getY() + " " + fieldCoordinates[1].getX() + " " + fieldCoordinates[1].getY());
-        System.out.println("Values now are: " + fieldsVisual[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() + " " + fieldsVisual[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
+
+        if (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() == empty){//empty first-pressed field case
+            System.out.println("Field " + fieldCoordinates[0].getX() + " " + fieldCoordinates[0].getY() + " is empty");
+            System.out.println("Backend after fail\n");
+            printBackend();
+            return 2;
+        }
+        if(fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() != empty && fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn() != empty) {//both fields have pawns
+            System.out.println("Unable to swap pawns");
+            System.out.println("Backend after fail\n");
+            printBackend();
+            return 3;
+        }
+        System.out.println("*********** SUCCESS ***********");
+        System.out.println("Current values are: " + fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() + " " + fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
+
+        //values swapping
+        int tempFieldValue = fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn();
+        fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].setCurrentPawn(fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
+        fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].setCurrentPawn(tempFieldValue);
+
+
+        System.out.println("swapped " + fieldCoordinates[0].getX() + " " + fieldCoordinates[0].getY() + " and " + fieldCoordinates[1].getX() + " " + fieldCoordinates[1].getY());
+        System.out.println("Values now are: " + fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() + " " + fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn() + "\n");
+
+        System.out.println("Backend after swap:\n");
+        printBackend();
         return 0;
     }
     private void refreshIcons() {
         System.out.println("Refreshing icons...");
-        for (field i[] : fieldsVisual) {//iterate over each field and count pawns
+        for (field i[] : fields) {//iterate over each field and count pawns
             for (field j : i) {
                 Icon icon;
-                int fieldValue = -1;
 
                 switch (j.getCurrentPawn()) {
-                    case empty: {//empty dark field
-                        //icon = new ImageIcon(getClass().getResource("icons/dark_empty.png"));
+                    case empty: {//empty field
                         icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
-                        fieldValue = empty;
                         break;
                     }
-                    case blackPawn: {//empty light field
-                        //icon = new ImageIcon(getClass().getResource("icons/light_empty.png"));
-                        //create transparent icon
+                    case blackPawn: {//field with black pawn
                         icon = new ImageIcon(getClass().getResource("icons/blackPawn.png"));
-                        fieldValue = blackPawn;
                         break;
                     }
-                    case whitePawn: {//dark field with dark pawn
+                    case whitePawn: {//field with white pawn
                         icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
-                        fieldValue = blackPawn;
                         break;
                     }
                     default: {//default case that SHOULD NOT occur
@@ -278,7 +310,6 @@ public class board {
         do {
             System.out.print("");//without this statement program will not see user input
         }while(getGameType() == -1);//wait for input
-
         return;
     }
 
@@ -289,7 +320,4 @@ public class board {
             findMoveAttempt();
         }
     }
-
-
-
 }
