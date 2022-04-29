@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
 import static java.lang.Thread.sleep;
 
 public class board {
@@ -19,9 +21,11 @@ public class board {
     field fields[][] = new field[size][size];
 
     //private int fieldsValues[][] = new int[size][size];//2D array for backend depiction of field. It portrays placement of pawns on the board
-    private final int empty = 0;
-    private final int blackPawn = 1;
-    private final int whitePawn = 2;
+    public final int empty = 0;
+    public final int blackPawn = 1;
+    public final int whitePawn = 2;
+    public final int blackQueen = 3;
+    public final int whiteQueen = 4;
 
     public void initialize(){
         drawBoard();         //open window with board GUI
@@ -151,13 +155,55 @@ public class board {
     void findMoveAttempt() {
         int pressedButtonsCounter = 0;
         coordinates[] pressedButtons = new coordinates[2];        //array with 2 coordinates
+        while(pressedButtonsCounter < 2) {
+            for (field i[] : fields) {//iterate over each field and count pawns
+                for (field j : i) {
+                    if (j.getIsPressed()) {
+                        if (pressedButtonsCounter == 0) {
+                            System.out.println("first button pressed");
+                            pressedButtons[0] = new coordinates(j.getX(), j.getY());
+                            pressedButtonsCounter++;
+                        } else if (pressedButtonsCounter == 1 && (j.getX() != pressedButtons[0].getX() && j.getY() != pressedButtons[0].getY())) {
+                            System.out.println("second button pressed");
+                            pressedButtons[1] = new coordinates(j.getX(), j.getY());
+                            pressedButtonsCounter++;
+                        }
+                    }
+                }
+            }
+        }
 
-        for (field i[] : fields) {//iterate over each field and count pawns
+        if (pressedButtonsCounter == 2) {//show pressed buttons;
+            System.out.println("\nPressed buttons are: " + pressedButtons[0].getY() + " " + pressedButtons[0].getX() + " " + pressedButtons[1].getY() + " " + pressedButtons[1].getX());
+            fields[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
+            fields[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
+            //TODO: make pawn move in this if statement
+            if (move(pressedButtons) != 0) {
+                System.out.println("Invalid move attempt");
+            }
+            refreshIcons();
+        }
+        System.out.println("Finito");
+        /*for (field i[] : fields) {//iterate over each field and count pawns
             for (field j : i) {
-                if (j.getIsPressed() /*&& (j.getX() != pressedButtons[0].getX() && j.getY() != pressedButtons[0].getY())*/) {//if found presesd button different than the one first pressed
-                    pressedButtons[pressedButtonsCounter] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
-                    System.out.println("Detected pressed button: " + pressedButtons[pressedButtonsCounter].getX() + " " + pressedButtons[pressedButtonsCounter].getY());
-                    pressedButtonsCounter++;
+                if (j.getIsPressed()) {//if found presesd button different than the one first pressed
+                    if (pressedButtonsCounter > 0){
+                        if(j.getX() != pressedButtons[0].getX() && j.getY() != pressedButtons[0].getY()){//check if the already-registered button is not trying to be assigned again
+                            System.out.println("\n***** Przypisanie 1 *****");
+                            System.out.println("pressedButtonsCounter = " + pressedButtonsCounter);
+                            pressedButtons[pressedButtonsCounter] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
+                            System.out.println("Detected pressed button: " + pressedButtons[pressedButtonsCounter].getX() + " " + pressedButtons[pressedButtonsCounter].getY());
+                            pressedButtonsCounter++;
+                            System.out.println("pressedButtonsCounter = " + pressedButtonsCounter);
+                        }
+                    }else if(pressedButtonsCounter == 0){
+                        System.out.println("\n***** Przypisanie 0 *****");
+                        System.out.println("pressedButtonsCounter = " + pressedButtonsCounter);
+                        pressedButtons[pressedButtonsCounter] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
+                        System.out.println("Detected pressed button: " + pressedButtons[pressedButtonsCounter].getX() + " " + pressedButtons[pressedButtonsCounter].getY());
+                        pressedButtonsCounter++;
+                        System.out.println("pressedButtonsCounter = " + pressedButtonsCounter);
+                    }
                 }
                 if (pressedButtonsCounter == 2)
                     break;
@@ -174,9 +220,13 @@ public class board {
                     System.out.println("Invalid move attempt");
                 }
                 refreshIcons();
-                //pressedButtonsCounter = 0;
+
+                pressedButtonsCounter = 0;      //resetting values
+                pressedButtons[0] = null;
+                pressedButtons[1] = null;
+                break;
             }
-        }
+        }*/
     }
     int move(coordinates pressedButtons[]){
         //TODO: create if that validates move
@@ -193,6 +243,12 @@ public class board {
             }
             System.out.println();
         }
+    }
+    int distanceBetweenFields(coordinates fieldCoordinates[]){
+        if (abs(fieldCoordinates[0].getX() - fieldCoordinates[1].getX()) == abs(fieldCoordinates[0].getY() - fieldCoordinates[1].getY())) {//if fields are on the diagonal
+            return abs(fieldCoordinates[0].getX() - fieldCoordinates[1].getX());
+        }
+        return -1;
     }
     int swapFieldValues(coordinates fieldCoordinates[]){//2 values to swap
         System.out.println("*********** NEW SWAP ***********");
@@ -219,13 +275,28 @@ public class board {
             printBackend();
             return 3;
         }
+
         System.out.println("*********** SUCCESS ***********");
         System.out.println("Current values are: " + fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() + " " + fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
 
-        //values swapping
-        int tempFieldValue = fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn();
-        fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].setCurrentPawn(fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
-        fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].setCurrentPawn(tempFieldValue);
+
+        int distance = distanceBetweenFields(fieldCoordinates);
+        switch (distance){                                          //values swapping
+            case -1:{
+                System.out.println("Fields are not on the same diagonal");
+                return 4;
+            }
+            default:{
+                if (distance > 2){//TODO: add exception for queen and attack
+                    System.out.println("Distance between fields is too big");
+                    return 5;
+                }
+                int tempFieldValue = fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn();
+                fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].setCurrentPawn(fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn());
+                fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].setCurrentPawn(tempFieldValue);
+            }
+        }
+
 
 
         System.out.println("swapped " + fieldCoordinates[0].getX() + " " + fieldCoordinates[0].getY() + " and " + fieldCoordinates[1].getX() + " " + fieldCoordinates[1].getY());
@@ -240,7 +311,7 @@ public class board {
         for (field i[] : fields) {//iterate over each field and count pawns
             for (field j : i) {
                 Icon icon;
-
+                j.setIsPressed(false);
                 switch (j.getCurrentPawn()) {
                     case empty: {//empty field
                         icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));

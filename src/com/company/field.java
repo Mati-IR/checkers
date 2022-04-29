@@ -12,18 +12,20 @@ public class field {
     public final int empty = 0;
     public final int blackPawn = 1;
     public final int whitePawn = 2;
+    public final int blackQueen = 3;
+    public final int whiteQueen = 4;
     private Color fieldColor;
     private int currentPawn;
     private boolean isPressed;
     public JButton button;
 
 
-    field(Icon icon, Dimension dimension, Color color, int x, int y){//initializer
-        initializeButton(icon, dimension, color);
+    field(Icon icon, Dimension dimension, Color FieldBackgroundcolor, int x, int y){//initializer
+        initializeButton(icon, dimension, FieldBackgroundcolor);
         setX(x);//set point coordinates
         setY(y);
         isPressed = false;
-        fieldColor = color;
+        fieldColor = FieldBackgroundcolor;
     }
 
     void initializeButton(Icon icon, Dimension dimension, Color color){
