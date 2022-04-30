@@ -10,6 +10,7 @@ import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 import static java.lang.Thread.sleep;
 
+//test comment
 public class board {
     private int gameType = -1;//incorrect value for used in do while loop in choosegameType()
 
@@ -169,6 +170,11 @@ public class board {
                             pressedButtonsCounter++;
                         }
                     }
+                    if (pressedButtons[0] != null && !fields[pressedButtons[0].getY()][pressedButtons[0].getX()].getIsPressed()) {//button is no longer pressed
+                        pressedButtons[0] = null;
+                        pressedButtonsCounter = 0;
+                        System.out.println("function findMoveAttempt() button is no longer pressed");
+                    }
                 }
             }
         }
@@ -177,62 +183,34 @@ public class board {
             System.out.println("\nPressed buttons are: " + pressedButtons[0].getY() + " " + pressedButtons[0].getX() + " " + pressedButtons[1].getY() + " " + pressedButtons[1].getX());
             fields[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
             fields[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
-            //TODO: make pawn move in this if statement
             if (move(pressedButtons) != 0) {
                 System.out.println("Invalid move attempt");
             }
             refreshIcons();
         }
         System.out.println("Finito");
-        /*for (field i[] : fields) {//iterate over each field and count pawns
-            for (field j : i) {
-                if (j.getIsPressed()) {//if found presesd button different than the one first pressed
-                    if (pressedButtonsCounter > 0){
-                        if(j.getX() != pressedButtons[0].getX() && j.getY() != pressedButtons[0].getY()){//check if the already-registered button is not trying to be assigned again
-                            System.out.println("\n***** Przypisanie 1 *****");
-                            System.out.println("pressedButtonsCounter = " + pressedButtonsCounter);
-                            pressedButtons[pressedButtonsCounter] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
-                            System.out.println("Detected pressed button: " + pressedButtons[pressedButtonsCounter].getX() + " " + pressedButtons[pressedButtonsCounter].getY());
-                            pressedButtonsCounter++;
-                            System.out.println("pressedButtonsCounter = " + pressedButtonsCounter);
-                        }
-                    }else if(pressedButtonsCounter == 0){
-                        System.out.println("\n***** Przypisanie 0 *****");
-                        System.out.println("pressedButtonsCounter = " + pressedButtonsCounter);
-                        pressedButtons[pressedButtonsCounter] = new coordinates(j.getX(), j.getY());//add pressed button coordinates to array
-                        System.out.println("Detected pressed button: " + pressedButtons[pressedButtonsCounter].getX() + " " + pressedButtons[pressedButtonsCounter].getY());
-                        pressedButtonsCounter++;
-                        System.out.println("pressedButtonsCounter = " + pressedButtonsCounter);
-                    }
-                }
-                if (pressedButtonsCounter == 2)
-                    break;
-            }
-            if (pressedButtonsCounter == 1 && !(fields[pressedButtons[0].getY()][pressedButtons[0].getX()].getIsPressed())) {//check if first clicked button is still clicked
-                System.out.println("First button is not pressed anymore");
-            }
-            if (pressedButtonsCounter == 2) {//show pressed buttons;
-                System.out.println("\nPressed buttons are: " + pressedButtons[0].getX() + " " + pressedButtons[0].getY() + " " + pressedButtons[1].getX() + " " + pressedButtons[1].getY());
-                fields[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
-                fields[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
-                //TODO: make pawn move in this if statement
-                if (move(pressedButtons) != 0) {
-                    System.out.println("Invalid move attempt");
-                }
-                refreshIcons();
-
-                pressedButtonsCounter = 0;      //resetting values
-                pressedButtons[0] = null;
-                pressedButtons[1] = null;
-                break;
-            }
-        }*/
     }
     int move(coordinates pressedButtons[]){
-        //TODO: create if that validates move
-        if (swapFieldValues(pressedButtons) != 0){
-            System.out.println("Move unsuccessful");
-            return 1;
+        //TODO: create if-s that validates move
+
+        if (isAttack(pressedButtons)) {//attack
+            System.out.println("Attack");
+            if (swapFieldValues(pressedButtons) != 0){
+                System.out.println("Attack unsuccessful");
+                return 1;
+            }else {
+                System.out.println("Attack successful");
+                coordinates fieldToRemove = fieldBetween(pressedButtons);
+                fields[fieldToRemove.getY()][fieldToRemove.getX()].setCurrentPawn(empty);
+            }
+        }else if(distanceBetweenFields(pressedButtons) != 1){//not attack, validate move distance
+            if(fields[pressedButtons[0].getY()][pressedButtons[0].getX()].getCurrentPawn() == whiteQueen || fields[pressedButtons[0].getY()][pressedButtons[0].getX()].getCurrentPawn() == blackQueen)//if pressedButtons[0] is queen
+                return 1;
+        }else {
+            if (swapFieldValues(pressedButtons) != 0) {
+                System.out.println("Move unsuccessful");
+                return 1;
+            }
         }
         return 0;//everything ok
     }
@@ -250,10 +228,21 @@ public class board {
         }
         return -1;
     }
+    coordinates fieldBetween(coordinates fieldCoordinates[]){// method to help isAttack() method
+        return new coordinates((fieldCoordinates[0].getY() + fieldCoordinates[1].getY()) / 2, (fieldCoordinates[0].getX() + fieldCoordinates[1].getX()) / 2);
+    }
+    boolean fieldsHaveDifferentColorPawns(coordinates fieldCoordinates[]){//if fields are the same color and are not empty
+        return (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() != fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn()) //if pawns are different color
+            && (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() != 0) && (fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn() != 0);//if fields are not empty
+    }
+    boolean isAttack(coordinates fieldCoordinates[]){
+        return distanceBetweenFields(fieldCoordinates) >= 2 && fieldsHaveDifferentColorPawns(new coordinates[]{fieldCoordinates[0], fieldBetween(fieldCoordinates)}); //if fields are the same color and are not empty
+    }
     int swapFieldValues(coordinates fieldCoordinates[]){//2 values to swap
         System.out.println("*********** NEW SWAP ***********");
         fieldCoordinates[0].printCoordinates();
         fieldCoordinates[1].printCoordinates();
+
         System.out.println("Backend before swap:\n");
         printBackend();
         if (fieldCoordinates.length != 2){//bad parameter passed
@@ -310,26 +299,32 @@ public class board {
         System.out.println("Refreshing icons...");
         for (field i[] : fields) {//iterate over each field and count pawns
             for (field j : i) {
-                Icon icon;
+                Icon icon = null;
                 j.setIsPressed(false);
-                switch (j.getCurrentPawn()) {
-                    case empty: {//empty field
-                        icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
-                        break;
+                try {
+                    switch (j.getCurrentPawn()) {
+                        case empty: {//empty field
+                            icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
+                            break;
+                        }
+                        case blackPawn: {//field with black pawn
+                            icon = new ImageIcon(getClass().getResource("icons/blackPawn.png"));
+                            break;
+                        }
+                        case whitePawn: {//field with white pawn
+                            icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
+                            break;
+                        }
+                        default: {//default case that SHOULD NOT occur
+                            icon = new ImageIcon(getClass().getResource("icons/test.png"));
+                            System.out.println("Default case in refreshIcons() for field Y:" + j.getY() + " X:" + j.getX());
+                            break;
+                        }
                     }
-                    case blackPawn: {//field with black pawn
-                        icon = new ImageIcon(getClass().getResource("icons/blackPawn.png"));
-                        break;
-                    }
-                    case whitePawn: {//field with white pawn
-                        icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
-                        break;
-                    }
-                    default: {//default case that SHOULD NOT occur
-                        icon = new ImageIcon(getClass().getResource("icons/test.png"));
-                        break;
-                    }
+                }catch (NullPointerException e){
+                    System.out.println("NullPointerException in refreshIcons() for field Y:" + j.getY() + " X:" + j.getX());
                 }
+                
                 j.setIcon(icon);
                 j.button.setBackground(j.getFieldColor()); //remove highlight by re-painting the field
             }
