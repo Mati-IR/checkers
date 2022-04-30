@@ -6,20 +6,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
-import static java.lang.Math.PI;
 import static java.lang.Math.abs;
-import static java.lang.Thread.sleep;
 
-//test comment
 public class board {
     private int gameType = -1;//incorrect value for used in do while loop in choosegameType()
 
 
     private static final Color myBlack = new Color(143, 90, 10);
     private static final Color myWhite = new Color(245, 200, 144);
-    private int size = 8;//x and y dimension of board
+    private final int size = 8;//x and y dimension of board
     //JButton fieldsVisual[][] = new JButton[size][size];//2D array for GUI
-    field fields[][] = new field[size][size];
+    field[][] fields = new field[size][size];
 
     //private int fieldsValues[][] = new int[size][size];//2D array for backend depiction of field. It portrays placement of pawns on the board
     public final int empty = 0;
@@ -87,39 +84,43 @@ public class board {
 
         for (int yAxis = 0; yAxis < size; yAxis++) { //     loop for adding fields of checkers board
             for (int xAxis = 0; xAxis < size; xAxis++) {
-                Icon icon;
+                Icon icon = null;
                 Color futureColor = new Color(0, 0, 0);
                 int fieldValue = -1;
+                try {
+                    switch (initialFieldValue(xAxis, yAxis)) {
+                        case 0: {//empty dark field
+                            icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
+                            futureColor = myBlack;
+                            fieldValue = empty;
+                            break;
+                        }
+                        case 1: {//empty light field
+                            icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)); // transparent icon
+                            futureColor = myWhite;
+                            fieldValue = empty;
+                            break;
+                        }
+                        case 2: {//dark field with dark pawn
+                            icon = new ImageIcon(getClass().getResource("icons/blackPawn.png"));
+                            futureColor = myBlack;
+                            fieldValue = blackPawn;
+                            break;
+                        }
+                        case 3: {//dark field with light pawn
+                            icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
+                            futureColor = myBlack;
+                            fieldValue = whitePawn;
+                            break;
+                        }
+                        default: {//default case that SHOULD NOT occur
+                            icon = new ImageIcon(getClass().getResource("icons/test.png"));
+                        }
 
-                switch (initialFieldValue(xAxis, yAxis)) {
-                    case 0: {//empty dark field
-                        icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
-                        futureColor = myBlack;
-                        fieldValue = empty;
-                        break;
                     }
-                    case 1:{//empty light field
-                        icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)); // transparent icon
-                        futureColor = myWhite;
-                        fieldValue = empty;
-                        break;
-                    }
-                    case 2:{//dark field with dark pawn
-                        icon = new ImageIcon(getClass().getResource("icons/blackPawn.png"));
-                        futureColor = myBlack;
-                        fieldValue = blackPawn;
-                        break;
-                    }
-                    case 3:{//dark field with light pawn
-                        icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
-                        futureColor = myBlack;
-                        fieldValue = whitePawn;
-                        break;
-                    }
-                    default:{//default case that SHOULD NOT occur
-                        icon = new ImageIcon(getClass().getResource("icons/test.png"));
-                    }
-
+                } catch (NullPointerException e) {
+                    System.out.println("NullPointerException in method drawBoard(), check if all icons are in file /src/com.company/icons");
+                    System.exit(1);
                 }
                 fields[yAxis][xAxis] = new field(icon, new Dimension(icon.getIconWidth(), icon.getIconHeight()), futureColor, xAxis, yAxis);
                 fields[yAxis][xAxis].setCurrentPawn(fieldValue);
@@ -141,7 +142,7 @@ public class board {
     
     boolean bothPlayersHavePawns(){
         int whites = 0, blacks = 0;
-        for (field i[]: fields) {//iterate over each field and count pawns
+        for (field[] i : fields) {//iterate over each field and count pawns
             for (field j: i) {
                 if(j.getCurrentPawn() == whitePawn)
                     whites++;
@@ -157,7 +158,7 @@ public class board {
         int pressedButtonsCounter = 0;
         coordinates[] pressedButtons = new coordinates[2];        //array with 2 coordinates
         while(pressedButtonsCounter < 2) {
-            for (field i[] : fields) {//iterate over each field and count pawns
+            for (field[] i : fields) {//iterate over each field and count pawns
                 for (field j : i) {
                     if (j.getIsPressed()) {
                         if (pressedButtonsCounter == 0) {
@@ -192,7 +193,7 @@ public class board {
 
 
 
-    int move(coordinates pressedButtons[]){
+    int move(coordinates[] pressedButtons){
         if (isAttack(pressedButtons)) {//attack
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Attack");
             if (swapFieldValues(pressedButtons) != 0){
@@ -221,34 +222,33 @@ public class board {
         return 1;//failure
     }
     void printBackend(){
-        for (field i[]: fields) {//iterate over each field and count pawns
+        for (field[] i : fields) {//iterate over each field and count pawns
             for (field j: i) {
                 System.out.print(j.getCurrentPawn());
             }
             System.out.println();
         }
     }
-    int distanceBetweenFields(coordinates fieldCoordinates[]){
+    int distanceBetweenFields(coordinates[] fieldCoordinates){
         if (abs(fieldCoordinates[0].getX() - fieldCoordinates[1].getX()) == abs(fieldCoordinates[0].getY() - fieldCoordinates[1].getY())) {//if fields are on the diagonal
             return abs(fieldCoordinates[0].getX() - fieldCoordinates[1].getX());
         }
         return -1;
     }
-    coordinates fieldBetween(coordinates fieldCoordinates[]){// method to help isAttack() method
+    coordinates fieldBetween(coordinates[] fieldCoordinates){// method to help isAttack() method
         return new coordinates((fieldCoordinates[0].getX() + fieldCoordinates[1].getX()) / 2, (fieldCoordinates[0].getY() + fieldCoordinates[1].getY()) / 2);
     }
-    boolean fieldsHaveDifferentColorPawns(coordinates fieldCoordinates[]){//if fields are the same color
+    boolean fieldsHaveDifferentColorPawns(coordinates[] fieldCoordinates){//if fields are the same color
         System.out.println("fieldsHaveDifferentColorPawns is checking fields " + fieldCoordinates[0].getY() + " " + fieldCoordinates[0].getX() + " and " + fieldCoordinates[1].getY() + " " + fieldCoordinates[1].getX());
         return (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() != fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn())//if pawns are different color
             && (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() != 0) && (fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn() != 0);//if fields are not empty
     }
-    boolean isAttack(coordinates fieldCoordinates[]){
+    boolean isAttack(coordinates[] fieldCoordinates){
         System.out.println("distanceBetweenFields " + distanceBetweenFields(fieldCoordinates));
         System.out.println("fieldsHaveDifferentColorPawns " + fieldsHaveDifferentColorPawns(new coordinates[]{fieldCoordinates[0], fieldBetween(fieldCoordinates)}));
-        coordinates debugFieldBetween = fieldBetween(fieldCoordinates);
         return distanceBetweenFields(fieldCoordinates) >= 2 && fieldsHaveDifferentColorPawns(new coordinates[]{fieldCoordinates[0], fieldBetween(fieldCoordinates)}); //if fields are the same color and are not empty
     }
-    int swapFieldValues(coordinates fieldCoordinates[]){//2 values to swap
+    int swapFieldValues(coordinates[] fieldCoordinates){//2 values to swap
         System.out.println("*********** NEW SWAP ***********");
         fieldCoordinates[0].printCoordinates();
         fieldCoordinates[1].printCoordinates();
@@ -307,7 +307,7 @@ public class board {
     }
     private void refreshIcons() {
         System.out.println("Refreshing icons...");
-        for (field i[] : fields) {//iterate over each field and count pawns
+        for (field[] i : fields) {//iterate over each field and count pawns
             for (field j : i) {
                 Icon icon = null;
                 j.setIsPressed(false);
@@ -386,7 +386,6 @@ public class board {
         do {
             System.out.print("");//without this statement program will not see user input
         }while(getGameType() == -1);//wait for input
-        return;
     }
 
 
