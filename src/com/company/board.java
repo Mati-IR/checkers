@@ -188,31 +188,37 @@ public class board {
             }
             refreshIcons();
         }
-        System.out.println("Finito");
     }
-    int move(coordinates pressedButtons[]){
-        //TODO: create if-s that validates move
 
+
+
+    int move(coordinates pressedButtons[]){
         if (isAttack(pressedButtons)) {//attack
-            System.out.println("Attack");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Attack");
             if (swapFieldValues(pressedButtons) != 0){
-                System.out.println("Attack unsuccessful");
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!Attack unsuccessful");
                 return 1;
             }else {
-                System.out.println("Attack successful");
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!Attack successful");
                 coordinates fieldToRemove = fieldBetween(pressedButtons);
                 fields[fieldToRemove.getY()][fieldToRemove.getX()].setCurrentPawn(empty);
+                System.out.println("Field to remove: " + fieldToRemove.getY() + " " + fieldToRemove.getX());
+                System.out.println("current pawn is " + fields[fieldToRemove.getY()][fieldToRemove.getX()].getCurrentPawn());
+                return 0;
             }
-        }else if(distanceBetweenFields(pressedButtons) != 1){//not attack, validate move distance
-            if(fields[pressedButtons[0].getY()][pressedButtons[0].getX()].getCurrentPawn() == whiteQueen || fields[pressedButtons[0].getY()][pressedButtons[0].getX()].getCurrentPawn() == blackQueen)//if pressedButtons[0] is queen
-                return 1;
-        }else {
+        }else if(distanceBetweenFields(pressedButtons) == 1){//not attack, validate move distance
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Not attack, validate move distance");
+            if(distanceBetweenFields(pressedButtons) != 1){//validate move distance for normal pawn
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!Not attack, validate move distance unsuccessful");
+            }
             if (swapFieldValues(pressedButtons) != 0) {
-                System.out.println("Move unsuccessful");
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!Move unsuccessful");
                 return 1;
             }
+            return 0;//all good, normal move
         }
-        return 0;//everything ok
+        System.out.println("Failure");
+        return 1;//failure
     }
     void printBackend(){
         for (field i[]: fields) {//iterate over each field and count pawns
@@ -229,13 +235,17 @@ public class board {
         return -1;
     }
     coordinates fieldBetween(coordinates fieldCoordinates[]){// method to help isAttack() method
-        return new coordinates((fieldCoordinates[0].getY() + fieldCoordinates[1].getY()) / 2, (fieldCoordinates[0].getX() + fieldCoordinates[1].getX()) / 2);
+        return new coordinates((fieldCoordinates[0].getX() + fieldCoordinates[1].getX()) / 2, (fieldCoordinates[0].getY() + fieldCoordinates[1].getY()) / 2);
     }
-    boolean fieldsHaveDifferentColorPawns(coordinates fieldCoordinates[]){//if fields are the same color and are not empty
-        return (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() != fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn()) //if pawns are different color
+    boolean fieldsHaveDifferentColorPawns(coordinates fieldCoordinates[]){//if fields are the same color
+        System.out.println("fieldsHaveDifferentColorPawns is checking fields " + fieldCoordinates[0].getY() + " " + fieldCoordinates[0].getX() + " and " + fieldCoordinates[1].getY() + " " + fieldCoordinates[1].getX());
+        return (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() != fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn())//if pawns are different color
             && (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() != 0) && (fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn() != 0);//if fields are not empty
     }
     boolean isAttack(coordinates fieldCoordinates[]){
+        System.out.println("distanceBetweenFields " + distanceBetweenFields(fieldCoordinates));
+        System.out.println("fieldsHaveDifferentColorPawns " + fieldsHaveDifferentColorPawns(new coordinates[]{fieldCoordinates[0], fieldBetween(fieldCoordinates)}));
+        coordinates debugFieldBetween = fieldBetween(fieldCoordinates);
         return distanceBetweenFields(fieldCoordinates) >= 2 && fieldsHaveDifferentColorPawns(new coordinates[]{fieldCoordinates[0], fieldBetween(fieldCoordinates)}); //if fields are the same color and are not empty
     }
     int swapFieldValues(coordinates fieldCoordinates[]){//2 values to swap
@@ -243,8 +253,8 @@ public class board {
         fieldCoordinates[0].printCoordinates();
         fieldCoordinates[1].printCoordinates();
 
-        System.out.println("Backend before swap:\n");
-        printBackend();
+        /*System.out.println("Backend before swap:\n");
+        printBackend();*/
         if (fieldCoordinates.length != 2){//bad parameter passed
             System.out.println("Wrong number of arguments in swapFieldValues");
             System.out.println("Backend after fail\n");
@@ -291,8 +301,8 @@ public class board {
         System.out.println("swapped " + fieldCoordinates[0].getX() + " " + fieldCoordinates[0].getY() + " and " + fieldCoordinates[1].getX() + " " + fieldCoordinates[1].getY());
         System.out.println("Values now are: " + fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() + " " + fields[fieldCoordinates[1].getY()][fieldCoordinates[1].getX()].getCurrentPawn() + "\n");
 
-        System.out.println("Backend after swap:\n");
-        printBackend();
+        /*System.out.println("Backend after swap:\n");
+        printBackend();*/
         return 0;
     }
     private void refreshIcons() {
