@@ -163,11 +163,11 @@ public class board {
                 for (field j : i) {
                     if (j.getIsPressed()) {
                         if (pressedButtonsCounter == 0) {
-                            //System.out.println("first button pressed");
+                            System.out.println("first button pressed");
                             pressedButtons[0] = new coordinates(j.getX(), j.getY());
                             pressedButtonsCounter++;
-                        } else if (pressedButtonsCounter == 1 && (j.getX() != pressedButtons[0].getX() && j.getY() != pressedButtons[0].getY())) {
-                            //System.out.println("second button pressed");
+                        } else if (pressedButtonsCounter == 1 && (j.getX() != pressedButtons[0].getX() || j.getY() != pressedButtons[0].getY())) {
+                            System.out.println("second button pressed");
                             pressedButtons[1] = new coordinates(j.getX(), j.getY());
                             pressedButtonsCounter++;
                         }
@@ -182,7 +182,7 @@ public class board {
         }
 
         if (pressedButtonsCounter == 2) {//show pressed buttons;
-            //System.out.println("\nPressed buttons are: " + pressedButtons[0].getY() + " " + pressedButtons[0].getX() + " " + pressedButtons[1].getY() + " " + pressedButtons[1].getX());
+            System.out.println("\nPressed buttons are: " + pressedButtons[0].getY() + " " + pressedButtons[0].getX() + " " + pressedButtons[1].getY() + " " + pressedButtons[1].getX());
             fields[pressedButtons[0].getY()][pressedButtons[0].getX()].setIsPressed(false);
             fields[pressedButtons[1].getY()][pressedButtons[1].getX()].setIsPressed(false);//reset isPressed flag IMPORTANT: IT IS JUST FOR TESTING PURPOSES
             if (move(pressedButtons) != 0) {
@@ -196,30 +196,19 @@ public class board {
 
     int move(coordinates[] pressedButtons){
         if (isAttack(pressedButtons)) {//attack
-            //System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Attack");
             if (swapFieldValues(pressedButtons) != 0){
-                //System.out.println("!!!!!!!!!!!!!!!!!!!!!!Attack unsuccessful");
                 return 1;
             }else {
-                //System.out.println("!!!!!!!!!!!!!!!!!!!!!!Attack successful");
                 coordinates fieldToRemove = fieldBetween(pressedButtons);
                 fields[fieldToRemove.getY()][fieldToRemove.getX()].setCurrentPawn(empty);
-                //System.out.println("Field to remove: " + fieldToRemove.getY() + " " + fieldToRemove.getX());
-                //System.out.println("current pawn is " + fields[fieldToRemove.getY()][fieldToRemove.getX()].getCurrentPawn());
                 return 0;
             }
         }else if(distanceBetweenFields(pressedButtons) == 1){//not attack, validate move distance
-            //System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Not attack, validate move distance");
-            if(distanceBetweenFields(pressedButtons) != 1){//validate move distance for normal pawn
-                //System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!Not attack, validate move distance unsuccessful");
-            }
             if (swapFieldValues(pressedButtons) != 0) {
-                //System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!Move unsuccessful");
                 return 1;
             }
             return 0;//all good, normal move
         }
-        //System.out.println("Failure");
         return 1;//failure
     }
     void printBackend(){
