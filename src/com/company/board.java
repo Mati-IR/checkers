@@ -10,7 +10,7 @@ import static java.lang.Math.abs;
 
 public class board {
     private int gameType = -1;//incorrect value for used in do while loop in choosegameType()
-    private turn turns = new turn();
+    private final turn turns = new turn();
 
 
     private static final Color myBlack = new Color(143, 90, 10);
@@ -162,12 +162,12 @@ public class board {
             for (field[] i : fields) {//iterate over each field and count pawns
                 for (field j : i) {
                     if (j.getIsPressed()) {
-                        if (pressedButtonsCounter == 0) {
-                            System.out.println("first button pressed");
+                        if (pressedButtonsCounter == 0) {//first button pressed
+                            //System.out.println("first button pressed");
                             pressedButtons[0] = new coordinates(j.getX(), j.getY());
                             pressedButtonsCounter++;
-                        } else if (pressedButtonsCounter == 1 && (j.getX() != pressedButtons[0].getX() || j.getY() != pressedButtons[0].getY())) {
-                            System.out.println("second button pressed");
+                        } else if (pressedButtonsCounter == 1 && (j.getX() != pressedButtons[0].getX() || j.getY() != pressedButtons[0].getY())) {//second button pressed and not on the same field
+                            //System.out.println("second button pressed");
                             pressedButtons[1] = new coordinates(j.getX(), j.getY());
                             pressedButtonsCounter++;
                         }
@@ -175,7 +175,6 @@ public class board {
                     if (pressedButtons[0] != null && !fields[pressedButtons[0].getY()][pressedButtons[0].getX()].getIsPressed()) {//button is no longer pressed
                         pressedButtons[0] = null;
                         pressedButtonsCounter = 0;
-                        //System.out.println("function findMoveAttempt() button is no longer pressed");
                     }
                 }
             }
