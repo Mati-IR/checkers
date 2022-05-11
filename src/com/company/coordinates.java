@@ -2,6 +2,7 @@ package com.company;
 
 public class coordinates {
     private int x, y;
+    private boolean pawnsBetween = false;//flag for move() method in board class
     coordinates(){
         x = 0;
         y = 0;
@@ -29,5 +30,13 @@ public class coordinates {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    public boolean getPawnsBetween() {
+        return pawnsBetween;
+    }
+
+    public void setPawnsBetween(boolean pawnsBetween) {
+        this.pawnsBetween = pawnsBetween;
     }
 }
