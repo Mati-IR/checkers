@@ -134,10 +134,9 @@ public class board {
         //setting up turn indicator
         turnIndicator = new JPanel();
         turnIndicator.setLayout(new FlowLayout());
-        turnIndicator.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        turnIndicator.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));//small borders so that board is in tact and visible
         turnIndicator.setSize(100, 50);
-        //add text to turnIndicator
-        turnIndicatorText = new JLabel("White's turn");
+        turnIndicatorText = new JLabel("White's turn");//add text to turnIndicator
         turnIndicatorText.setFont(new Font("Arial", Font.BOLD, 20));
         turnIndicator.add(turnIndicatorText);
         turnIndicator.setBackground(Color.ORANGE);
@@ -330,10 +329,20 @@ public class board {
                 || ((fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() == blackPawn || fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() == blackQueen)
                 && turns.isBlackTurn());
     }
+    boolean pawnsDirectionIsCorrect(coordinates[] fieldCoordinates) {//if pawns are moving in the correct direction
+        System.out.println(fieldCoordinates[0].getY() > fieldCoordinates[1].getY() ? "White should move" : "Black should move");
+        boolean attack = isAttack(fieldCoordinates);
+        boolean isWhitePawn = fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() == whitePawn;
+        boolean whiteDirectionOk = (isWhitePawn//white pawn case
+                        && (fieldCoordinates[0].getY() > fieldCoordinates[1].getY()));//if white pawn moves up
+        boolean isBlackPawn = fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() == blackPawn;
+        boolean blackDirectionOk = (isBlackPawn//black pawn case
+                        && (fieldCoordinates[0].getY() < fieldCoordinates[1].getY()));
+        return whiteDirectionOk || blackDirectionOk || attack;
+    }
+
     int swapFieldValues(coordinates[] fieldCoordinates){//2 values to swap
         //System.out.println("*********** NEW SWAP ***********");
-        fieldCoordinates[0].printCoordinates();
-        fieldCoordinates[1].printCoordinates();
 
         if (fieldCoordinates.length != 2 ){//bad parameter passed
             System.out.println("Wrong number of arguments in swapFieldValues");
@@ -341,6 +350,8 @@ public class board {
             printBackend();
             return 1;
         }
+        fieldCoordinates[0].printCoordinates();//field what should contain moving pawn
+        fieldCoordinates[1].printCoordinates();//destination field
 
         if (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() == empty){//empty first-pressed field case
             System.out.println("Field " + fieldCoordinates[0].getX() + " " + fieldCoordinates[0].getY() + " is empty");
@@ -357,6 +368,10 @@ public class board {
         if(!colorCanMove(fieldCoordinates)){//color can't move and first field is not empty
             System.out.println("Color can't move");
             return 4;
+        }
+        if (!pawnsDirectionIsCorrect(fieldCoordinates)){
+            System.out.println("Incorrect direction");
+            return 5;
         }
 
         if (fields[fieldCoordinates[0].getY()][fieldCoordinates[0].getX()].getCurrentPawn() == whiteQueen
