@@ -13,11 +13,13 @@ public class board {
     private final turn turns = new turn();
 
 
-    private static final Color myBlack = new Color(143, 90, 10);
-    private static final Color myWhite = new Color(245, 200, 144);
+    private static final Color boardBrown = new Color(143, 90, 10);
+    private static final Color boardWhite = new Color(245, 200, 144);
     private final int size = 8;//x and y dimension of board
     //JButton fieldsVisual[][] = new JButton[size][size];//2D array for GUI
     field[][] fields = new field[size][size];
+    JPanel turnIndicator;
+    JLabel turnIndicatorText;
 
     //private int fieldsValues[][] = new int[size][size];//2D array for backend depiction of field. It portrays placement of pawns on the board
     public final int empty = 0;
@@ -92,25 +94,25 @@ public class board {
                     switch (initialFieldValue(xAxis, yAxis)) {
                         case 0: {//empty dark field
                             icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
-                            futureColor = myBlack;
+                            futureColor = boardBrown;
                             fieldValue = empty;
                             break;
                         }
                         case 1: {//empty light field
                             icon = new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)); // transparent icon
-                            futureColor = myWhite;
+                            futureColor = boardWhite;
                             fieldValue = empty;
                             break;
                         }
                         case 2: {//dark field with dark pawn
                             icon = new ImageIcon(getClass().getResource("icons/blackPawn.png"));
-                            futureColor = myBlack;
+                            futureColor = boardBrown;
                             fieldValue = blackPawn;
                             break;
                         }
                         case 3: {//dark field with light pawn
                             icon = new ImageIcon(getClass().getResource("icons/whitePawn.png"));
-                            futureColor = myBlack;
+                            futureColor = boardBrown;
                             fieldValue = whitePawn;
                             break;
                         }
@@ -129,9 +131,27 @@ public class board {
             }
         }
 
-        frame.setVisible(true);
+        //setting up turn indicator
+        turnIndicator = new JPanel();
+        turnIndicator.setLayout(new FlowLayout());
+        turnIndicator.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        turnIndicator.setSize(100, 50);
+        //add text to turnIndicator
+        turnIndicatorText = new JLabel("White's turn");
+        turnIndicatorText.setFont(new Font("Arial", Font.BOLD, 20));
+        turnIndicator.add(turnIndicatorText);
+        turnIndicator.setBackground(Color.ORANGE);
+        turnIndicator.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //add turnIndicator to frame
+
+
+        frame.add(turnIndicator); //include turn indicator in game window
         frame.add(panel);       //include checkers board in game window
+
+        frame.setVisible(true);
+        turnIndicator.setVisible(true);
         panel.setVisible(true);
+        turnIndicatorText.setVisible(true);
     }
 
     int getSize(){
@@ -379,6 +399,8 @@ public class board {
         return 0;
     }
     private void refreshIcons() {
+        turnIndicatorText.setText((turns.isWhiteTurn() ? "White's " : "Black's ") + " turn");
+
         //System.out.println("Refreshing icons...");
         for (field[] i : fields) {//iterate over each field and count pawns
             for (field j : i) {
