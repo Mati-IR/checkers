@@ -11,8 +11,12 @@ public class coordinates {
         this.x = x;
         this.y = y;
     }
+    coordinates(field f){
+        this.x = f.getX();
+        this.y = f.getY();
+    }
     void printCoordinates(){
-        System.out.println("(" + x + "," + y + ")");
+        System.out.println("(x,y)(" + x + "," + y + ")");
         return;
     }
 

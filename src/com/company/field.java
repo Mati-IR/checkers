@@ -87,6 +87,10 @@ public class field {
         return fieldColor;
     }
 
+    public coordinates getCoordinates(){
+        return new coordinates(getX(), getY());
+    }
+
     public void setFieldColor(Color fieldColor) {
         this.fieldColor = fieldColor;
     }
